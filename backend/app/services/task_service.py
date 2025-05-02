@@ -1,9 +1,9 @@
 # task_service.py
 from datetime import datetime
 from typing import List, Optional
-from app.models.task_model import Task
-from app.repositories.task_repository import TaskRepository
-from app.schemas.task_schema import TaskSchema
+from backend.app.models.task_model import Task
+from backend.app.repositories.task_repository import TaskRepository
+from backend.app.schemas.task_schema import TaskSchema
 
 task_repo = TaskRepository()
 task_schema = TaskSchema()
@@ -21,7 +21,7 @@ class TaskService:
         else:
             return []
 
-    def create_task(self, data) -> Task:
+    def create_task(self, data):
         """Create a new task"""
         errors = task_schema.validate(data)
         if errors:

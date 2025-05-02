@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from typing import Optional
-from app.models.user_model import User
+from backend.app.models.user_model import User
 
 class UserRepositoryInterface(ABC):
 

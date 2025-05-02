@@ -1,9 +1,9 @@
 # api/routes.py
 
 from flask import Blueprint, request, jsonify
-from app.services.user_service import UserService
-from app.services.task_service import TaskService
-from app.services.tag_service import TagService
+from backend.app.services.user_service import UserService
+from backend.app.services.task_service import TaskService
+from backend.app.services.tag_service import TagService
 
 from flask_jwt_extended import jwt_required, get_jwt_identity
 

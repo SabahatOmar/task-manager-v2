@@ -1,5 +1,5 @@
-from app.repositories.tag_repository import TagRepository
-from app.repositories.task_repository import TaskRepository
+from backend.app.repositories.tag_repository import TagRepository
+from backend.app.repositories.task_repository import TaskRepository
 
 class TagService:
     def __init__(self):

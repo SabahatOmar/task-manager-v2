@@ -1,7 +1,7 @@
 #user_service.py
-from app.repositories.user_repository import UserRepository
-from app.models.user_model import User
-from app.schemas.user_schema import UserSchema
+from backend.app.repositories.user_repository import UserRepository
+from backend.app.models.user_model import User
+from backend.app.schemas.user_schema import UserSchema
 from flask_jwt_extended import create_access_token
 
 user_schema = UserSchema()

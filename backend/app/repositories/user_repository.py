@@ -1,9 +1,9 @@
 # user_repository.py
 
-from app.models.user_model import User
+from backend.app.models.user_model import User
 from typing import Optional
-from app.extensions import db
-from app.repositories.user_repository_interface import UserRepositoryInterface
+from backend.app.extensions import db
+from backend.app.repositories.user_repository_interface import UserRepositoryInterface
 
 class UserRepository(UserRepositoryInterface):
     def get_by_id(self, user_id: int) -> Optional[User]:

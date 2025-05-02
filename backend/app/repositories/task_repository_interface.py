@@ -1,6 +1,6 @@
 # task_repository.py
 from abc import ABC, abstractmethod
-from app.models.task_model import Task
+from backend.app.models.task_model import Task
 from typing import List, Optional
 
 class TaskRepositoryInterface(ABC):

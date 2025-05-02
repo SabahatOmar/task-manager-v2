@@ -1,4 +1,4 @@
-from app.extensions import db
+from backend.app.extensions import db
 
 # Association Table: links Task ↔ Tag
 task_tags = db.Table(

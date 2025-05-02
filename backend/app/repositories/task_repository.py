@@ -1,9 +1,9 @@
 # task_repository.py
 
-from app.models.task_model import Task
+from backend.app.models.task_model import Task
 from typing import List, Optional
-from app.extensions import db
-from app.repositories.task_repository_interface import TaskRepositoryInterface
+from backend.app.extensions import db
+from backend.app.repositories.task_repository_interface import TaskRepositoryInterface
 
 class TaskRepository(TaskRepositoryInterface):
     def get_all(self) -> List[Task]:

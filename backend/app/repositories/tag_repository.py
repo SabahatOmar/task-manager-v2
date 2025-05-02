@@ -1,7 +1,7 @@
-from app.extensions import db
-from app.models.tag_model import Tag
-from app.models.task_model import Task
-from app.repositories.task_repository import TaskRepository
+from backend.app.extensions import db
+from backend.app.models.tag_model import Tag
+from backend.app.models.task_model import Task
+from backend.app.repositories.task_repository import TaskRepository
 
 class TagRepository:
     def __init__(self):

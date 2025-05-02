@@ -1,6 +1,6 @@
-from app.extensions import db
+from backend.app.extensions import db
 from datetime import datetime, timezone
-from app.models.tag_model import task_tags
+from backend.app.models.tag_model import task_tags
 
 class Task(db.Model):
     __tablename__ = 'tasks'
