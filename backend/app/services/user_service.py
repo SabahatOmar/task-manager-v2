@@ -38,15 +38,24 @@ class UserService:
 
     @staticmethod
     def get_user_by_id(user_id):
-        user = UserRepository.get_by_id(user_id)
+        user = user_repo.get_by_id(user_id)
         if not user:
             return {"error": "User not found"}, 404
-        return user_schema.dump(user), 200
+        #return user_schema.dump(user), 200
+        return user, 200
 
     @staticmethod
     def get_user_by_name(username):
-        user = UserRepository.get_by_email(username)
+        user = user_repo.get_by_username(username)
         if not user:
-            return False
-        elif user:
+            return None
+        else:
+            return user
+
+    @staticmethod
+    def delete_user(user_id):
+        success = user_repo.delete(user_id)
+        if success:
             return True
+        else:
+            return False

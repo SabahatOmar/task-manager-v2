@@ -13,8 +13,9 @@ class TaskRepository(TaskRepositoryInterface):
     def get_by_user(self, user_id):
         return Task.query.filter_by(user_id=user_id).all()
 
-    def get_by_id(self, task_id: int) -> Optional[Task]:
-        return db.session.get(Task, task_id)
+    def get_by_id_for_user(self, task_id: int, user_id: int) -> Optional[Task]:
+        print (task_id, user_id)
+        return Task.query.filter_by(id=task_id, user_id=user_id).first()
 
     def create(self, task: Task) -> Task:
         """Create a new task in the database"""
@@ -32,3 +33,10 @@ class TaskRepository(TaskRepositoryInterface):
         db.session.delete(task)
         db.session.commit()
         return True
+
+    def update_fields(self, task, update_data):
+        for field, value in update_data.items():
+            if hasattr(task, field):
+                setattr(task, field, value)
+        db.session.commit()
+        return task

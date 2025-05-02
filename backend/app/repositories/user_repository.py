@@ -13,6 +13,7 @@ class UserRepository(UserRepositoryInterface):
     def get_by_username(self, email: str) -> Optional[User]:
         """Fetch a user by their email"""
         return User.query.filter_by(username=email).first()
+        #return User.query.filter_by(username=email)
 
     def create(self, user: User) -> User:
         """Create a new user in the database"""
@@ -25,8 +26,9 @@ class UserRepository(UserRepositoryInterface):
         db.session.commit()
         return user
 
-    def delete(self, user: User) -> bool:
+    def delete(self, user_id: int) -> bool:
         """Delete a user from the database"""
+        user = User.query.get(user_id)
         db.session.delete(user)
         db.session.commit()
         return True

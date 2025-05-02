@@ -1,5 +1,6 @@
 from app.extensions import db
 from datetime import datetime, timezone
+from app.models.tag_model import task_tags
 
 class Task(db.Model):
     __tablename__ = 'tasks'
@@ -12,3 +13,7 @@ class Task(db.Model):
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    tags = db.relationship('Tag',
+                           secondary = task_tags,
+                           backref  = db.backref('tasks',lazy = 'dynamic'),
+                           lazy = 'subquery')

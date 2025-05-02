@@ -15,7 +15,7 @@ class TaskRepositoryInterface(ABC):
         pass
 
     @abstractmethod
-    def get_by_id(self, task_id: int) -> Optional[Task]:
+    def get_by_id_for_user(self, task_id: int, user_id: int) -> Optional[Task]:
         """Fetch a task by its ID"""
         pass
 

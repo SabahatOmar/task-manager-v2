@@ -1,5 +1,6 @@
 import pytest
 from app.services.user_service import UserService
+
 from app.models.user_model import User
 from app import db
 
@@ -34,3 +35,4 @@ def test_login_invalid_password(app, valid_user_data):
         response, status = UserService.login_user(data)
         assert status == 400
         assert "Invalid username or password" in response["error"]
+

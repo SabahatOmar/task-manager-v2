@@ -41,9 +41,9 @@ class TaskService:
         else:
             return {"message": "Task not created"}, 400
 
-    def delete_task(self, task_id: int) -> bool:
+    def delete_task(self, task_id: int, user_id: int) -> bool:
         """Delete a task by ID"""
-        task = task_repo.get_by_id(task_id)
+        task = task_repo.get_by_id_for_user(task_id, user_id)
         if task:
             return task_repo.delete(task)
         return False
@@ -60,3 +60,13 @@ class TaskService:
                 "created_at": task.created_at,
                 "user_id": task.user_id
             }.items() if value is not None}
+
+    def update_task(self, task_id, user_id, update_data):
+        # Fetch the task first (via repository)
+        task = task_repo.get_by_id_for_user(task_id, user_id)
+        if not task:
+            return None  # Task not found or unauthorized
+
+        # Delegate field updates to repository
+        updated_task = task_repo.update_fields(task, update_data)
+        return updated_task
