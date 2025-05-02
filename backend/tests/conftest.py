@@ -1,6 +1,6 @@
 # backend/tests/conftest.py  (or inside your test file)
 import pytest
-from app import create_app, db
+from backend.app import create_app, db
 
 @pytest.fixture
 def app():

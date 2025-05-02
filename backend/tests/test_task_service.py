@@ -1,12 +1,12 @@
 from datetime import datetime
 
 import pytest
-from app.services.task_service import TaskService
-from app.services.user_service import UserService
-from app.models.tag_model import Tag
-from app.models.task_model import Task
-from app import db
-from app.repositories.task_repository import TaskRepository
+from backend.app.services.task_service import TaskService
+from backend.app.services.user_service import UserService
+from backend.app.models.tag_model import Tag
+from backend.app.models.task_model import Task
+from backend.app import db
+from backend.app.repositories.task_repository import TaskRepository
 
 task_repo = TaskRepository()
 task_service = TaskService()
@@ -63,12 +63,12 @@ def test_get_task_user(app, task_data):
 def test_delete_existing_task(app, task_data):
     with app.app_context():
         response ,status = task_service.create_task(task_data)
-        success = task_service.delete_task(1)
+        success = task_service.delete_task(1,1)
         assert success is True
 
 def test_delete_nonexisting_task(app, task_data):
     with app.app_context():
-        success = task_service.delete_task(000)
+        success = task_service.delete_task(000,1)
         assert success is False
 
 def test_serialize_task(app, task_data):

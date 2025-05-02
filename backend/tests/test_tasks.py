@@ -39,7 +39,7 @@ def test_get_tasks(client):
         headers={'Authorization': f'Bearer {token}'}
     )
     client.get('/api/tasks/')
-    response = client.get('/api/tasks/1' ,headers={'Authorization': f'Bearer {token}'})
+    response = client.get('/api/tasks' ,headers={'Authorization': f'Bearer {token}'})
     assert response.status_code == 200
     tasks  = response.get_json()
     assert isinstance(tasks, list)

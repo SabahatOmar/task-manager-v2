@@ -1,8 +1,8 @@
 import pytest
-from app import create_app, db
-from app.models.task_model import Task
-from app.repositories.task_repository import TaskRepository
-from app.repositories.task_repository_interface import TaskRepositoryInterface
+from backend.app import create_app, db
+from backend.app.models.task_model import Task
+from backend.app.repositories.task_repository import TaskRepository
+from backend.app.repositories.task_repository_interface import TaskRepositoryInterface
 
 @pytest.fixture
 def app():
@@ -35,8 +35,8 @@ def test_get_task_by_user_id(task_repository, new_task):
 def test_delete_task(task_repository, new_task):
     """Test deleting a task."""
     task_repository.create(new_task)
-    task = task_repository.get_by_id(new_task.id)
+    task = task_repository.get_by_id_for_user(new_task.id,1)
     task_repository.delete(task)
 
-    deleted_task = task_repository.get_by_id(new_task.id)
+    deleted_task = task_repository.get_by_id_for_user(new_task.id,1)
     assert deleted_task is None  # Ensure the task was deleted

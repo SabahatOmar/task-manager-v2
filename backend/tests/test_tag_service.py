@@ -1,6 +1,6 @@
-from app.services.tag_service import TagService
+from backend.app.services.tag_service import TagService
 import pytest
-from app.models.tag_model import Tag
+from backend.app.models.tag_model import Tag
 
 @pytest.fixture
 def sample_tags(app):

@@ -1,8 +1,8 @@
 import pytest
-from app.services.user_service import UserService
+from backend.app.services.user_service import UserService
 
-from app.models.user_model import User
-from app import db
+from backend.app.models.user_model import User
+from backend.app import db
 
 @pytest.fixture
 def valid_user_data():
