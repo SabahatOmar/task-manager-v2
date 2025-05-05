@@ -56,8 +56,8 @@ class TaskService:
                 "title": task.title,
                 "description": task.description,
                 "priority": task.priority,
-                "deadline": task.deadline,
-                "created_at": task.created_at,
+                "deadline": task.deadline.isoformat() if task.deadline else None,
+                'created_at': task.created_at.isoformat() if task.created_at else None,
                 "user_id": task.user_id
             }.items() if value is not None}
 
