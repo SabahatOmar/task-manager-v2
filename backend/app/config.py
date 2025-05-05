@@ -2,7 +2,12 @@ import os
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY', 'default-secret-key')
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///../instance/task_manager.db')
+    #SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL',
+    #'postgresql+psycopg2://postgres:postgres@db:5432/task_manager')
+    #SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://sabahatomar:newpassword@localhost/task_manager'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL',
+                                             'postgresql+psycopg2://sabahatomar:newpassword@localhost:5432/task_manager')
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY', 'jwt-secret-key')
     JWT_ACCESS_TOKEN_EXPIRES = 3600  # seconds
@@ -11,7 +16,12 @@ class Config:
     #JWT_HEADER_NAME = "Authorization"
     #JWT_HEADER_TYPE = "Bearer"
 class DevelopmentConfig(Config):
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///task_manager.db'
+    #SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://sabahatomar:newpassword@localhost/task_manager'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL',
+                                             'postgresql+psycopg2://sabahatomar:newpassword@localhost:5432/task_manager')
+
+    #SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL',
+    #'postgresql+psycopg2://postgres:postgres@db:5432/task_manager')
     DEBUG = True
 
 class TestingConfig(Config):

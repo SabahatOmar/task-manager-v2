@@ -1,148 +1,136 @@
-# api/routes.py
-
-from flask import Blueprint, request, jsonify
+from flask import request, jsonify
+from flask_restx import Namespace, Resource
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from backend.app.services.user_service import UserService
 from backend.app.services.task_service import TaskService
 from backend.app.services.tag_service import TagService
-
-from flask_jwt_extended import jwt_required, get_jwt_identity
-
-api_bp = Blueprint("api", __name__)
-
-# Register individual blueprints inside this
-
-auth_blueprint = Blueprint("auth", __name__)
-task_blueprint = Blueprint("tasks", __name__)
-tag_blueprint = Blueprint('tags', __name__)
-
-
-# Initialize services
+from flask_restx import fields
+auth_ns = Namespace('auth', description='Authentication operations')
+tasks_ns = Namespace('tasks', description='Task operations')
+tags_ns = Namespace('tags', description='Tag operations')
 user_service=UserService()
 task_service=TaskService()
 tag_service = TagService()
 
-# Route to register a user
-@auth_blueprint.route("/register", methods=["POST"])
-def register():
-    data = request.get_json()
-    if not data["username"] or not data["password"]:
-        return jsonify({"error": "Email and password are required"}), 401
-    response, status_code = user_service.register_user(data)
-    if status_code == 201:
-        return jsonify({"message": "User registered successfully"}), 201
-    if status_code == 400:
-        return jsonify({"message": "Username already exists"}), 400
+login_model = auth_ns.model('Login', {
+    'username': fields.String(required=True, description='The username'),
+    'password': fields.String(required=True, description='The password')
+})
 
-# Route to login a user
-@auth_blueprint.route("/login", methods=["POST"])
-def login():
-    data = request.get_json()
-    message, status_code= user_service.login_user(data)
-    if status_code==400:
-        return jsonify(message), 400
-    elif status_code==200:
-        return jsonify(message), 200
+register_model = auth_ns.model('Register', {
+    'username': fields.String(required=True, description='The username'),
+    'password': fields.String(required=True, description='The password')
+})
 
-# Protected route to get all tasks
-@task_blueprint.route('/tasks', methods=['GET'])
+# Create namespaces
 
-#@task_blueprint.route("/tasks", methods=["GET"])
-@jwt_required()
-def get_tasks():
-    current_user_id = int(get_jwt_identity())
-    tasks = task_service.get_task_by_user(current_user_id)  # You might need to filter tasks per user
-    serialized_tasks = [task_service.serialize_task(task) for task in tasks]
-    return jsonify(serialized_tasks), 200
+# Authentication routes
+@auth_ns.route('/register')
+class RegisterResource(Resource):
+    @auth_ns.expect(register_model)
 
-# Protected route to create a new task
-@task_blueprint.route("/tasks", methods=["POST"])
-@jwt_required()
-def create_task():
-    current_user_id = get_jwt_identity()
-    data = request.get_json()
-    data["user_id"] = current_user_id
-    message, status_code = task_service.create_task(data)
-    if status_code == 200:
-        return jsonify(message) , 200
-    else:
-        return jsonify(message), 400
+    def post(self):
+        print("after docking")
+        data = request.get_json()
+        if not data.get('username') or not data.get('password'):
+            return {'error': 'Username and password are required'}, 400
+        response, status_code = user_service.register_user(data)
+        return response, status_code
 
-@api_bp.route('/tasks/<int:task_id>', methods=['DELETE'])
-@jwt_required()
+@auth_ns.route('/login')
+class LoginResource(Resource):
+    @auth_ns.expect(login_model)
 
-def delete_task(task_id):
-    current_user_id = get_jwt_identity()
-    success =task_service.delete_task(task_id,current_user_id)
-    if success:
-        return jsonify({'message': 'Task deleted successfully'}), 200
-    else:
-        return jsonify({'message': 'Task not deleted'}), 400
+    def post(self):
+        data = request.get_json()
+        response, status_code = user_service.login_user(data)
+        return response, status_code
 
-@api_bp.route('/deleteuser/<int:user_id>', methods=['DELETE'])
-@jwt_required()
+@auth_ns.route('/delete/<int:user_id>')
+class DeleteUserResource(Resource):
+    @jwt_required()
+    def delete(self, user_id):
+        success = user_service.delete_user(user_id)
+        if success:
+            return {'message': 'User deleted successfully'}, 200
+        else:
+            return {'message': 'User not deleted'}, 400
 
-def delete_user(user_id):
-    success =user_service.delete_user(user_id)
-    if success:
-        return jsonify({'message': 'User deleted successfully'}), 200
-    else:
-        return jsonify({'message': 'User not deleted'}), 400
+# Task routes
+@tasks_ns.route('/')
+class TaskListResource(Resource):
+    @jwt_required()
+    def get(self):
+        current_user_id = int(get_jwt_identity())
+        tasks = task_service.get_task_by_user(current_user_id)
+        serialized_tasks = [task_service.serialize_task(task) for task in tasks]
+        return serialized_tasks, 200
 
-@api_bp.route('/tags', methods=['POST'])
-@jwt_required()
-def create_tag():
-    data = request.get_json()
-    tag_name = data.get('name')
-    if not tag_name:
-        return jsonify({"error": "Tag name is required"}), 400
-    success = tag_service.create_tag(data)
-    if success:
-        return jsonify({"message": "Tag created"}), 201
-    return jsonify({"error": "Tag already exists"}), 400
+    @jwt_required()
+    def post(self):
+        current_user_id = int(get_jwt_identity())
+        data = request.get_json()
+        data['user_id'] = current_user_id
+        message, status_code = task_service.create_task(data)
+        return message, status_code
 
-@api_bp.route('/tags/<int:task_id>', methods=['GET'])
-@jwt_required()
-def get_tags(task_id):
-    current_user_id = int(get_jwt_identity())
-    print(current_user_id ," this is the id", task_id)
-    tags = tag_service.get_all_tags(task_id, current_user_id)
-    print ("this is tags" , tags)
-    if tags:
-        tag_names = [tag.name for tag in tags]
-        return jsonify({"tags": tag_names}), 200
-    return jsonify({"error" :"tags cannot be fetched"}), 400
+@tasks_ns.route('/<int:task_id>')
+class TaskResource(Resource):
+    @jwt_required()
+    def delete(self, task_id):
+        current_user_id = int(get_jwt_identity())
+        success = task_service.delete_task(task_id, current_user_id)
+        if success:
+            return {'message': 'Task deleted successfully'}, 200
+        else:
+            return {'message': 'Task not deleted'}, 400
 
-@api_bp.route('/tags/<int:task_id>', methods=['POST'])
-@jwt_required()
-def add_tag_to_task(task_id):
-    data = request.get_json()
-    current_user_id = int(get_jwt_identity())
-    success = tag_service.set_tag_by_name(data, task_id, current_user_id)
-    if success:
-        return jsonify({"message": "Tag added"}), 201
-    return jsonify({"error": "Tag couldn't be set"}), 400
+# Tag routes
+@tags_ns.route('/')
+class TagListResource(Resource):
+    @jwt_required()
+    def post(self):
+        current_user_id = int(get_jwt_identity())
+        data = request.get_json()
+        data['user_id'] = current_user_id
+        success = tag_service.create_tag(data)
+        if success:
+            return {'message': 'Tag created'}, 201
+        return {'error': 'Tag already exists'}, 400
 
-@api_bp.route('/tags/<int:task_id>', methods=['DELETE'])
-@jwt_required()
-def remove_tag_from_task(task_id):
-    data = request.get_json()
-    current_user_id = int(get_jwt_identity())
-    success = tag_service.remove_tag(task_id, data , current_user_id)
-    if success:
-        return jsonify({"message": "Tag removed"}), 201
-    return jsonify({"error": "Tag couldn't be removed"}), 400
+    @jwt_required()
+    def delete(self):
+        data = request.get_json()
+        success = tag_service.delete_tag(data)
+        if success:
+            return {'message': 'Tag deleted'}, 201
+        return {'error': "Tag couldn't be deleted"}, 400
 
-@api_bp.route('/tags', methods=['DELETE'])
-@jwt_required()
-def delete_tag():
-    data = request.get_json()
-    success = tag_service.delete_tag(data)
-    if success:
-        return jsonify({"message": "Tag deleted"}), 201
-    return jsonify({"error": "Tag couldn't be deleted"}), 400
+@tags_ns.route('/<int:task_id>')
+class TaskTagResource(Resource):
+    @jwt_required()
+    def get(self, task_id):
+        current_user_id = int(get_jwt_identity())
+        tags = tag_service.get_all_tags(task_id, current_user_id)
+        if tags:
+            tag_names = [tag.name for tag in tags]
+            return {'tags': tag_names}, 200
+        return {'error': 'Tags cannot be fetched'}, 400
 
+    @jwt_required()
+    def post(self, task_id):
+        current_user_id = int(get_jwt_identity())
+        data = request.get_json()
+        success = tag_service.set_tag_by_name(data, task_id, current_user_id)
+        if success:
+            return {'message': 'Tag added'}, 201
+        return {'error': "Tag couldn't be set"}, 400
 
-api_bp.register_blueprint(tag_blueprint, url_prefix="/tags")
-api_bp.register_blueprint(auth_blueprint, url_prefix="/auth")
-api_bp.register_blueprint(task_blueprint, url_prefix="")
-
+    @jwt_required()
+    def delete(self, task_id):
+        current_user_id = int(get_jwt_identity())
+        data = request.get_json()
+        success = tag_service.remove_tag(task_id, data, current_user_id)
+        if success:
+            return {'message': 'Tag removed'}, 201
+        return {'error': "Tag couldn't be removed"}, 400
