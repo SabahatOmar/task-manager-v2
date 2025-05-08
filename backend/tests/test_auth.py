@@ -1,7 +1,8 @@
 def test_register(client):
     response =  client.post('/auth/register', json={
         'username': 'testuser',
-        'password': 'testpassword'
+        'password': 'testpassword',
+        'email': 'testemail'
     })
     assert response.status_code == 201
     assert response.get_json()['message'] == 'User registered successfully'
@@ -9,7 +10,8 @@ def test_register(client):
 def test_login(client):
     client.post('/auth/register', json={
         'username': 'testuser2',
-        'password': 'testpassword'
+        'password': 'testpassword',
+        'email': 'testemail'
     })
 
     response =     client.post('/auth/login', json={

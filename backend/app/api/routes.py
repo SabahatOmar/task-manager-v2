@@ -1,10 +1,14 @@
 from flask import request, jsonify
 from flask_restx import Namespace, Resource
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token
 from backend.app.services.user_service import UserService
 from backend.app.services.task_service import TaskService
 from backend.app.services.tag_service import TagService
 from flask_restx import fields
+from backend.app.extensions import redis_client
+import json
+
+
 auth_ns = Namespace('auth', description='Authentication operations')
 tasks_ns = Namespace('tasks', description='Task operations')
 tags_ns = Namespace('tags', description='Tag operations')
@@ -19,7 +23,9 @@ login_model = auth_ns.model('Login', {
 
 register_model = auth_ns.model('Register', {
     'username': fields.String(required=True, description='The username'),
-    'password': fields.String(required=True, description='The password')
+    'password': fields.String(required=True, description='The password'),
+    'email': fields.String(required=True, description='The email')
+
 })
 
 # Create namespaces
@@ -40,11 +46,18 @@ class RegisterResource(Resource):
 @auth_ns.route('/login')
 class LoginResource(Resource):
     @auth_ns.expect(login_model)
-
     def post(self):
         data = request.get_json()
         response, status_code = user_service.login_user(data)
         return response, status_code
+
+@auth_ns.route('/refresh')
+class TokenRefresh(Resource):
+    @jwt_required(refresh=True)
+    def post(self):
+        current_user_id = int(get_jwt_identity())
+        new_access_token = create_access_token(identity = current_user_id)
+        return {'token':new_access_token}, 200
 
 @auth_ns.route('/delete/<int:user_id>')
 class DeleteUserResource(Resource):
@@ -62,8 +75,19 @@ class TaskListResource(Resource):
     @jwt_required()
     def get(self):
         current_user_id = int(get_jwt_identity())
-        tasks = task_service.get_task_by_user(current_user_id)
-        serialized_tasks = [task_service.serialize_task(task) for task in tasks]
+        cache_key = f"user:{current_user_id}:tasks"
+        cached_tasks = redis_client.get(cache_key)
+        print (cached_tasks)
+
+        if cached_tasks is not None:
+            print("Serving from cache")
+            serialized_tasks = json.loads(cached_tasks)
+        else:
+            print("Fetching from DB")
+            tasks = task_service.get_task_by_user(current_user_id)
+            serialized_tasks = [task_service.serialize_task(task) for task in tasks]
+            redis_client.set(cache_key, json.dumps(serialized_tasks), ex=60)  # expires in 60 seconds
+
         return serialized_tasks, 200
 
     @jwt_required()

@@ -15,10 +15,24 @@ class Config:
     JWT_TOKEN_LOCATION = ["headers"]
     #JWT_HEADER_NAME = "Authorization"
     #JWT_HEADER_TYPE = "Bearer"
+    MAIL_SERVER = 'smtp.gmail.com'
+    MAIL_PORT = 587
+    MAIL_USE_TLS = True
+    MAIL_USERNAME = 'sabahatomar2@gmail.com'
+    MAIL_PASSWORD = 'zhhfgeefqdrjfqyn'
+    MAIL_DEFAULT_SENDER = 'sabahatomar2@gmail.com'
+
+
 class DevelopmentConfig(Config):
     #SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://sabahatomar:newpassword@localhost/task_manager'
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL',
                                              'postgresql+psycopg2://sabahatomar:newpassword@localhost:5432/task_manager')
+    MAIL_SERVER = 'smtp.gmail.com'
+    MAIL_PORT = 587
+    MAIL_USE_TLS = True
+    MAIL_USERNAME = 'sabahatomar2@gmail.com'
+    MAIL_PASSWORD = 'zhhfgeefqdrjfqyn'
+    MAIL_DEFAULT_SENDER = 'sabahatomar2@gmail.com'
 
     #SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL',
     #'postgresql+psycopg2://postgres:postgres@db:5432/task_manager')

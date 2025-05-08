@@ -5,7 +5,9 @@ from http.client import responses
 def get_access_token(client):
     client.post('auth/register', json={
         'username': 'testuser2',
-        'password': 'testpassword'
+        'password': 'testpassword',
+        'email': 'testemail'
+
     })
 
     response = client.post('auth/login', json={

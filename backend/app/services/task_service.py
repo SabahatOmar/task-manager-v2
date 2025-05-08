@@ -1,15 +1,33 @@
 # task_service.py
 from datetime import datetime
 from typing import List, Optional
+from backend.app.services.user_service import UserService
 from backend.app.models.task_model import Task
 from backend.app.repositories.task_repository import TaskRepository
 from backend.app.schemas.task_schema import TaskSchema
+from flask_mail import Message
+from backend.app.extensions import mail, task_queue
+#from flask import current_app
 
+use_service = UserService()
 task_repo = TaskRepository()
 task_schema = TaskSchema()
 
+
 class TaskService:
-   # def __init__(self, task_repo: TaskRepository):
+
+    def send_deadline_email(self, recipient_email, task_title, deadline):
+        from backend.app import create_app
+
+        app = create_app()
+        with app.app_context():
+
+            msg = Message(f"Reminder: {task_title} is due",
+                          recipients=[recipient_email])
+            msg.body = f"Don't forget! Your task '{task_title}' is due on {deadline}."
+            mail.send(msg)
+
+    # def __init__(self, task_repo: TaskRepository):
        # self.task_repo = task_repo
 
     def get_task_by_user(self, user_id: int) -> Optional[Task]:
@@ -34,6 +52,8 @@ class TaskService:
             'deadline': datetime.strptime(data['deadline'], '%Y-%m-%d').date() if data.get('deadline') else None
         }
         new_task = Task(**task_data)
+        user, status = use_service.get_user_by_id(int(task_data["user_id"]))
+        task_queue.enqueue(self.send_deadline_email, user.email, task_data["title"], task_data["deadline"])
 
         done = task_repo.create(new_task)
         if done:

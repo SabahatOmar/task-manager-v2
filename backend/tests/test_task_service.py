@@ -23,7 +23,7 @@ def sample_tags(app):
 @pytest.fixture
 def test_user(app):
     with app.app_context():
-        user_data = {"username": "testuser", "password": "testpass"}
+        user_data = {"username": "testuser", "password": "testpass" , 'email': 'testemail'}
         UserService.register_user(user_data)
         user = UserService.get_user_by_name("testuser")
         return user

@@ -6,7 +6,7 @@ from backend.app import db
 
 @pytest.fixture
 def valid_user_data():
-    return {'username':'testuser', 'password': 'testpassword'}
+    return {'username':'testuser', 'password': 'testpassword', 'email': 'testemail'}
 
 def test_register_user_success(app, valid_user_data):
     with app.app_context():
